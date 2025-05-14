@@ -9,23 +9,23 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
-                    // Detecta el entorno según el nombre de la rama
-                    def branchName = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
+                    // Obtener nombre de la rama
+                    def branchName = env.GIT_BRANCH?.replaceFirst(/origin\//, '') ?: 'main'
                     def envFile = ".env.${branchName}"
                     echo "Usando archivo de entorno: ${envFile}"
 
-                    // Cargar las variables del archivo .env
-                    def envVars = readFile(envFile).split('\n')
-                    for (line in envVars) {
-                        if (line.trim()) {
-                            def (key, value) = line.trim().split('=')
-                            env[key] = value
+                    // Verificar si el archivo existe antes de intentar leerlo
+                    if (fileExists(envFile)) {
+                        def envVars = readFile(envFile).split('\n')
+                        for (line in envVars) {
+                            if (line.trim()) {
+                                def (key, value) = line.trim().split('=')
+                                env[key] = value
+                            }
                         }
+                    } else {
+                        error "El archivo ${envFile} no existe. Asegúrate de que esté presente en el repositorio."
                     }
-
-                    // Definir BRANCH_NAME para el deploy
-                    env.BRANCH_NAME = branchName
-                    echo "Branch actual: ${env.BRANCH_NAME}"
                 }
 
                 // Clonar el repositorio
@@ -45,7 +45,7 @@ pipeline {
                 sh """
                 ssh -i $SSH_KEY -o StrictHostKeyChecking=no $EC2_USER@$EC2_IP '
                     cd $REMOTE_PATH &&
-                    git pull origin $BRANCH_NAME &&
+                    git pull origin $branchName &&
                     npm ci &&
                     pm2 restart health-api || pm2 start server.js --name health-api
                 '
