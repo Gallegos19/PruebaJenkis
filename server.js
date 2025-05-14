@@ -6,12 +6,13 @@ app.use(helmet());
 app.use(express.json());
 
 app.get('/health', (_req, res) => {
-  res.status(200).json({ status: 'UP', timestamp: new Date().toISOString(), author: 'Gallegos' });
+  res.status(200).json({ status: 'UP', timestamp: new Date().toISOString(), author: 'Julio Gallegos' });
 });
 
 app.get('/hello', (_req, res) => {
   res.status(200).json({ message: 'Hello, world!', author: 'Gallegos19' });
 });
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
