@@ -2,16 +2,29 @@ pipeline {
     agent any
 
     environment {
-        NODE_ENV = 'production'
-        EC2_USER = 'ubuntu'
-        EC2_IP = '18.235.91.203'
-        REMOTE_PATH = '/home/ubuntu/PruebaJenkis'
         SSH_KEY = credentials('ssh-key-ec2')
     }
 
     stages {
         stage('Checkout') {
             steps {
+                script {
+                    // Detecta el entorno según el nombre de la rama
+                    def branchName = env.BRANCH_NAME ?: 'main'
+                    def envFile = ".env.${branchName}"
+                    echo "Usando archivo de entorno: ${envFile}"
+
+                    // Cargar las variables del archivo .env
+                    def envVars = readFile(envFile).split('\n')
+                    for (line in envVars) {
+                        if (line.trim()) {
+                            def (key, value) = line.trim().split('=')
+                            env[key] = value
+                        }
+                    }
+                }
+
+                // Clonar el repositorio
                 git branch: 'main', url: 'https://github.com/Gallegos19/PruebaJenkis.git'
             }
         }
@@ -28,7 +41,7 @@ pipeline {
                 sh """
                 ssh -i $SSH_KEY -o StrictHostKeyChecking=no $EC2_USER@$EC2_IP '
                     cd $REMOTE_PATH &&
-                    git pull origin main &&
+                    git pull origin $BRANCH_NAME &&
                     npm ci &&
                     pm2 restart health-api || pm2 start server.js --name health-api
                 '
