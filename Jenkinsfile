@@ -3,18 +3,18 @@ pipeline {
 
     environment {
         SSH_KEY = credentials('ssh-key-ec2')
+        BRANCH_NAME = "${env.GIT_BRANCH?.replaceFirst(/origin\//, '') ?: 'main'}"
     }
 
     stages {
         stage('Checkout') {
             steps {
                 script {
-                    // Obtener nombre de la rama
-                    def branchName = env.GIT_BRANCH?.replaceFirst(/origin\//, '') ?: 'main'
-                    def envFile = ".env.${branchName}"
+                    // Detectar el nombre de la rama
+                    def envFile = ".env.${BRANCH_NAME}"
                     echo "Usando archivo de entorno: ${envFile}"
 
-                    // Verificar si el archivo existe antes de intentar leerlo
+                    // Verificar si el archivo de entorno existe
                     if (fileExists(envFile)) {
                         def envVars = readFile(envFile).split('\n')
                         for (line in envVars) {
@@ -45,7 +45,7 @@ pipeline {
                 sh """
                 ssh -i $SSH_KEY -o StrictHostKeyChecking=no $EC2_USER@$EC2_IP '
                     cd $REMOTE_PATH &&
-                    git pull origin $branchName &&
+                    git pull origin $BRANCH_NAME &&
                     npm ci &&
                     pm2 restart health-api || pm2 start server.js --name health-api
                 '
