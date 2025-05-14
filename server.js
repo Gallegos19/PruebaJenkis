@@ -9,7 +9,7 @@ app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'UP', timestamp: new Date().toISOString(), author: 'Gallegos' });
 });
 
-app.get('/hi/', (req, res) => {
+app.get('/hi', (_req, res) => {
   res.status(200).json({ message: 'Hello, world!', author: 'Gallegos' });
 });
 
