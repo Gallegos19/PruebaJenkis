@@ -10,8 +10,8 @@ pipeline {
             steps {
                 script {
                     // Detecta el entorno según el nombre de la rama
-                    def branchName = env.BRANCH ?: 'main'
-                    def envFile = ".env.${branchName}"
+                    def BRANCH_NAME = env.BRANCH ?: 'main'
+                    def envFile = ".env.${BRANCH_NAME}"
                     echo "Usando archivo de entorno: ${envFile}"
 
                     // Cargar las variables del archivo .env
