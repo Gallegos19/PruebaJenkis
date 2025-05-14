@@ -10,7 +10,7 @@ app.get('/health', (_req, res) => {
 });
 
 app.get('/hello', (_req, res) => {
-  res.status(200).json({ message: 'Hello, world!', author: 'Gallegos' });
+  res.status(200).json({ message: 'Hello, world!', author: 'Fernanda' });
 });
 
 const PORT = process.env.PORT || 3000;
