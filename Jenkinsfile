@@ -29,7 +29,7 @@ pipeline {
                 }
 
                 // Clonar el repositorio
-                git branch: 'main', url: 'https://github.com/Gallegos19/PruebaJenkis.git'
+                git branch: 'qa', url: 'https://github.com/Gallegos19/PruebaJenkis.git'
             }
         }
 
