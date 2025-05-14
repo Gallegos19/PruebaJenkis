@@ -10,8 +10,8 @@ pipeline {
             steps {
                 script {
                     // Detecta el entorno según el nombre de la rama
-                    def BRANCH_NAME = env.BRANCH ?: 'main'
-                    def envFile = ".env.${BRANCH_NAME}"
+                    def branchName = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
+                    def envFile = ".env.${branchName}"
                     echo "Usando archivo de entorno: ${envFile}"
 
                     // Cargar las variables del archivo .env
@@ -22,6 +22,10 @@ pipeline {
                             env[key] = value
                         }
                     }
+
+                    // Definir BRANCH_NAME para el deploy
+                    env.BRANCH_NAME = branchName
+                    echo "Branch actual: ${env.BRANCH_NAME}"
                 }
 
                 // Clonar el repositorio
